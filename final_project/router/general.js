@@ -4,7 +4,6 @@ let isValid = require("./auth_users.js").isValid;
 let users = require("./auth_users.js").users;
 const public_users = express.Router();
 
-
 const filterBooksBy = (atribute, goal) => {
   // Make array of key/value pairs from books object
   const booksArray = Object.entries(books);
@@ -20,7 +19,6 @@ const filterBooksBy = (atribute, goal) => {
 };
 
 public_users.post("/register", (req, res) => {
-
   if (!req.body.username || !req.body.password) {
     return res.send("Must provide both username and password");
   }
@@ -31,9 +29,8 @@ public_users.post("/register", (req, res) => {
     return res.send("Username already in use. Please, pick another one.");
   }
 
-  users.push({"username": username, "password": password});
+  users.push({ username: username, password: password });
   res.send("User registered!");
-
 });
 
 // Get the book list available in the shop
@@ -98,12 +95,12 @@ public_users.get("/title/:title", async function (req, res) {
       if (filteredBooks.length > 0) {
         resolve(filteredBooks);
       } else {
-        reject({status: 404, message: "Books not found"})
+        reject({ status: 404, message: "Books not found" });
       }
     });
     const booksByTitle = await findBooks;
     return res.status(200).json(Object.fromEntries(booksByTitle));
-  } catch(error) {
+  } catch (error) {
     return res.status(error.status || 500).json({ message: error.message });
   }
 });
@@ -115,9 +112,15 @@ public_users.get("/review/:isbn", function (req, res) {
     return res.status(404).json({ message: "Book not found" });
   } else {
     const book = books[isbn];
-    return res.send(
-      `Reviews for the book "${book.title}", by ${book.author}: \n ${JSON.stringify(book.reviews)}`,
-    );
+    if (Object.keys(book.reviews).length > 0) {
+      return res.send(
+        `Reviews for the book "${book.title}", by ${book.author}: \n ${JSON.stringify(book.reviews)}`,
+      );
+    } else {
+      return res.send(
+        `The book "${book.title}", by ${book.author}, has no reviews yet.`
+      )
+    }
   }
 });
 

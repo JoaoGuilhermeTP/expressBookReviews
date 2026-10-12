@@ -13,32 +13,32 @@ app.use(express.json());
 
 // Keep customer login sessions under the /customer route namespace.
 app.use(
-    "/customer",
-    session({
-        secret: "fingerprint_customer",
-        resave: true,
-        saveUninitialized: true,
-    }),
+  "/customer",
+  session({
+    secret: "fingerprint_customer",
+    resave: true,
+    saveUninitialized: true,
+  }),
 );
 
 // Protect customer authentication endpoints with the access token stored in the session.
 app.use("/customer/auth/*", function auth(req, res, next) {
-    // A session without an authorization object means the user has not logged in.
-    if (req.session.authorization) {
-        let token = req.session.authorization["accessToken"];
+  // A session without an authorization object means the user has not logged in.
+  if (req.session.authorization) {
+    let token = req.session.authorization["accessToken"];
 
-        // Verify the token before allowing the request to reach the route handler.
-        jwt.verify(token, "fingerprint_customer", (err, user) => {
-            if (!err) {
-                req.user = user;
-                next();
-            } else {
-                return res.status(403).json({ message: "User not authenticated" });
-            }
-        });
-    } else {
-        return res.status(403).json({ message: "User not logged in" });
-    }
+    // Verify the token before allowing the request to reach the route handler.
+    jwt.verify(token, "fingerprint_customer", (err, user) => {
+      if (!err) {
+        req.user = user;
+        next();
+      } else {
+        return res.status(403).json({ message: "User not authenticated" });
+      }
+    });
+  } else {
+    return res.status(403).json({ message: "User not logged in" });
+  }
 });
 
 // Register the protected customer routes and the public general routes.
